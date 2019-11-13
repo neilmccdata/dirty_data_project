@@ -1,0 +1,50 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(tidyverse)
+library(dplyr)
+library(readxl)
+library(here)
+```
+
+```{r}
+# read the raw .rds file.
+here::here()
+decathlon_data_raw <- read_rds(here("raw_data/decathlon.rds"))
+decathlon_data_raw
+class(decathlon_data_raw)
+View(decathlon_data_raw)
+```
+```{r}
+# convert file to tibble, and add column name for athlete rows. 
+# athlete names are mixture of case, so set all names to  lower case.
+decathlon_data_raw <- as_tibble(rownames_to_column(decathlon_data_raw, var = "athlete"))
+decathlon_data_raw$athlete = tolower(decathlon_data_raw$athlete)
+decathlon_data_raw
+```
+
+
+```{r}
+# rename columns, prefix those columns we are formatting long with an x to make pivot_longer function
+# easier to write.
+
+names(decathlon_data_raw) <- c("athlete", "x100m", "xlong_jump", "xshot_put", "xhigh_jump", "x400m",
+                               "x110m_hurdle", "xdiscus", "xpole_vault", "xjaveline", "x1500m", "rank",                                   "points", "competition")
+decathlon_data_raw
+```
+```{r}
+decathlon_long <- decathlon_data_raw %>%
+  pivot_longer(cols = starts_with("x"),
+               names_to = "event",
+               values_to = "result") %>%
+  mutate(event = str_replace(event, "x", ""))
+decathlon_long
+```
+```{r}
+# write the cleaned and tidy file to clean_data directory
+here::here()
+write_csv(decathlon_long, here("clean_data/decathlon.csv"))
+```
+
