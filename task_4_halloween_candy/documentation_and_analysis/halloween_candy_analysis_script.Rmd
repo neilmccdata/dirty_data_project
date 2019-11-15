@@ -1,0 +1,26 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+# 1. What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)
+
+candy_data_all_rows_country_tidy %>%
+     filter(!is.na(response))  %>%
+     count(response)
+
+candy_data_all_rows_country_tidy %>%
+     filter(!is.na(response))  %>%
+     count(response) %>%
+     summarise(total = sum(n))
+
+```
+```{r}
+# 2. What was the average age of people who are going out trick or treating and the average age of people 3. not going trick or treating?
+distinct(candy_data_all_rows_country_tidy, age)
+names(candy_data_all_rows_country_tidy)
+candy_data_all_rows_country_tidy %>%
+     filter(going_out == "No") %>%
+     summarise(mean(age), na.rm = TRUE)
+```
+

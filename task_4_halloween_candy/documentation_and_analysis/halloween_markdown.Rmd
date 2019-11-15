@@ -1,0 +1,52 @@
+---
+title: "Halloween Candy Project"
+author: "Neil Mc"
+date: "15/11/2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Halloween Candy Analysis
+
+
+- Review of steps taken
+- What I did not complete
+- Step through Code
+- Talk through any issues
+
+## Steps taken
+
+- read in 3 candy files
+- for each file perform the following
+  - select only those columns we require for analysis
+  - pivot longer on candy (creating two columns candy and response)
+  - rename columns to standard
+  - add required columns (2015 file did not have all columns)
+  - rearrange order of columns so each of 3 files is idenical
+  
+- bind the three long files into one (915,000 rows) 
+- add a column "score". set to 1, -1 or 0 depending on response
+```{r}
+library(tidyverse)
+library(dplyr)
+library(readxl)
+library(here)
+library(janitor)
+```
+
+## Read the files
+```{r read, echo=TRUE}
+candy_data_raw_2015 <- 
+        read_xlsx(here("raw_data/boing-boing-candy-2015.xlsx"))
+candy_data_raw_2016 <- 
+        read_xlsx(here("raw_data/boing-boing-candy-2016.xlsx"))
+candy_data_raw_2017 <- 
+        read_xlsx(here("raw_data/boing-boing-candy-2017.xlsx"))
+dim(candy_data_raw_2015)
+dim(candy_data_raw_2016)
+dim(candy_data_raw_2017)
+```
+

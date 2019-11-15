@@ -1,0 +1,43 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+names(candy_data_raw_2017)
+```
+
+```{r}
+candy_data_raw_2017_subset <- candy_data_raw_2017 %>%
+    select(starts_with("Q1:"),
+           starts_with("Q2:"),
+           starts_with("Q3:"),
+           starts_with("Q4:"),
+           starts_with("Q6 |"))
+```
+
+```{r}
+candy_data_raw_2017_long <- candy_data_raw_2017_subset %>%
+  pivot_longer(cols = starts_with("Q6 |"),
+                 names_to = "candy",
+                 values_to = "response") %>%
+  clean_names()
+  names(candy_data_raw_2017_long)
+```
+
+
+```{r}
+  candy_data_raw_2017_long <- candy_data_raw_2017_long %>%
+      rename("going_out" = "q1_going_out") %>%
+      rename("gender" = "q2_gender") %>%
+      rename("age" = "q3_age") %>%
+      rename("country" = "q4_country")
+  names(candy_data_raw_2017_long)
+
+```
+
+
+```{r}
+names(candy_data_raw_2017_long)
+```

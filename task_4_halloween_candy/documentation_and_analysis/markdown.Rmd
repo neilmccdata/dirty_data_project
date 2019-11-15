@@ -1,0 +1,437 @@
+---
+title: "halloween_markdown_1"
+author: "Neil Mc"
+date: "15/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Halloween Candy Analysis
+
+
+- Review of steps taken
+- What I did not complete
+- Step through Code
+- Talk through any issues
+
+## Steps taken
+
+- read in 3 candy files
+- for each file perform the following
+  - select only those columns we require for analysis
+  - pivot longer on candy (creating two columns candy and response)
+  - rename columns to standard
+  - add required columns (2015 file did not have all columns)
+  - rearrange order of columns so each of 3 files is idenical
+  
+- bind the three long files into one (915,000 rows) 
+- add a column "score". set to 1, -1 or 0 depending on response
+```{r}
+library(tidyverse)
+library(dplyr)
+library(readxl)
+library(here)
+library(janitor)
+```
+
+## Read the files
+```{r read, echo=TRUE}
+candy_data_raw_2015 <- 
+        read_xlsx(here("raw_data/boing-boing-candy-2015.xlsx"))
+candy_data_raw_2016 <- 
+        read_xlsx(here("raw_data/boing-boing-candy-2016.xlsx"))
+candy_data_raw_2017 <- 
+        read_xlsx(here("raw_data/boing-boing-candy-2017.xlsx"))
+dim(candy_data_raw_2015)
+dim(candy_data_raw_2016)
+dim(candy_data_raw_2017)
+```
+
+## tidy 2015 file
+## select columns
+```{r}
+head(candy_data_raw_2015)
+# select only those columns required from 2015 file
+# 2015 file does not have all the required columns so we will add them later 
+# after investigation, it seemed that columns that are not named within square brackets [] are not valid candy names. I have not used clean_names verb as I wanted select column prefixed with [.
+head(candy_data_raw_2015)
+candy_data_raw_2015_subset <- candy_data_raw_2015 %>%
+    select(starts_with("How old are you?"),
+           starts_with("Are you going actually going trick"),
+           starts_with("["))
+dim(candy_data_raw_2015_subset)
+head(candy_data_raw_2015_subset)
+```
+
+## pivot long 2015
+```{r}
+# make the 2015 file long. add two columns "candy" and "response"
+# Pivot on candy descriptions columns, which in the main we see are prefixed with "["
+# clean the names now. 
+
+candy_data_raw_2015_long <- candy_data_raw_2015_subset %>%
+  pivot_longer(cols = starts_with("["),
+                 names_to = "candy",
+                 values_to = "response") %>%
+  clean_names()
+  names(candy_data_raw_2015_long)
+  dim(candy_data_raw_2015_long)
+```
+
+## rename columns to standard 2015
+```{r}
+# 2015 file only has two additional columns we are interested in. So rename to standard.
+candy_data_raw_2015_long <- candy_data_raw_2015_long %>%
+      rename("going_out" = "are_you_going_actually_going_trick_or_treating_yourself") %>%
+      rename("age" = "how_old_are_you")
+  names(candy_data_raw_2015_long)
+```
+
+## tidy 2016 file
+## select columns
+```{r}
+# 2016 file has more columns we requirte for analyisis. So select these.
+candy_data_raw_2016_subset <- candy_data_raw_2016 %>%
+    select(starts_with("How old are you?"),
+           starts_with("Your gender:"),
+           starts_with("Are you going actually going trick"),
+           starts_with("Which country do you live in?"),
+           starts_with("["))
+candy_data_raw_2016_subset
+```
+
+## pivot long 2016
+```{r}
+# like 2015 file, it appears the candy columns are prefixed with "["
+  candy_data_raw_2016_long <- candy_data_raw_2016_subset %>%
+  pivot_longer(cols = starts_with("["),
+                 names_to = "candy",
+                 values_to = "response") %>%
+  clean_names()
+  names(candy_data_raw_2016_long)
+  dim(candy_data_raw_2016_long)
+```
+
+## rename columns to standard 2016
+```{r}
+candy_data_raw_2016_long <- candy_data_raw_2016_long %>%
+      rename("age" = "how_old_are_you") %>%
+      rename("gender" = "your_gender") %>%
+      rename("going_out" = "are_you_going_actually_going_trick_or_treating_yourself") %>%
+      rename("country" = "which_country_do_you_live_in")
+  names(candy_data_raw_2016_long)
+```
+
+## tidy 2017 file
+## select columns
+
+```{r}
+# like 2016 file, the 2017 dataset has all the required columns.
+
+names(candy_data_raw_2017)
+candy_data_raw_2017_subset <- candy_data_raw_2017 %>%
+    select(starts_with("Q1:"),
+           starts_with("Q2:"),
+           starts_with("Q3:"),
+           starts_with("Q4:"),
+           starts_with("Q6 |"))
+```
+
+## pivot long 2017
+```{r}
+candy_data_raw_2017_long <- candy_data_raw_2017_subset %>%
+  pivot_longer(cols = starts_with("Q6 |"),
+                 names_to = "candy",
+                 values_to = "response") %>%
+  clean_names()
+  names(candy_data_raw_2017_long)
+  dim(candy_data_raw_2017_long)
+```
+## rename columns to standard 2017
+```{r}
+  candy_data_raw_2017_long <- candy_data_raw_2017_long %>%
+      rename("going_out" = "q1_going_out") %>%
+      rename("gender" = "q2_gender") %>%
+      rename("age" = "q3_age") %>%
+      rename("country" = "q4_country")
+  names(candy_data_raw_2017_long)
+```
+
+## progress so far
+dim(candy_data_raw_2015_long)<br>
+dim(candy_data_raw_2016_long)<br>
+dim(candy_data_raw_2017_long)<br>
+names(candy_data_raw_2015_long)<br>
+names(candy_data_raw_2016_long)<br>
+names(candy_data_raw_2017_long)
+```{r echo=FALSE}
+dim(candy_data_raw_2015_long)
+dim(candy_data_raw_2016_long)
+dim(candy_data_raw_2017_long)
+names(candy_data_raw_2015_long)
+names(candy_data_raw_2016_long)
+names(candy_data_raw_2017_long)
+```
+## add missing columns
+```{r echo=TRUE}
+# lets mutate 2015 file to add missing data
+# note: I couldn't add NA column. so had to replace string "na" to NA to set missing value
+# changed age to integer. This set invalid numeric values to na (missing) 
+candy_data_raw_2015_long_columns <- 
+            candy_data_raw_2015_long %>%
+            mutate(year = 2015) %>%
+            mutate(gender = "na") %>%
+            mutate(country = "na") %>%
+            mutate(gender = replace(gender, gender == "na", NA)) %>%
+            mutate(country = replace(country, country == "na", NA)) %>%
+            mutate_at("age" , as.integer)
+
+candy_data_raw_2016_long_columns <- 
+          candy_data_raw_2016_long %>%
+          mutate(year = 2016) %>%
+          mutate_at("age" , as.integer)
+
+candy_data_raw_2017_long_columns <- 
+                candy_data_raw_2017_long %>%
+                mutate(year = 2017) %>%
+                mutate_at("age" , as.integer)
+```
+## reorder columns
+```{r}
+# reorder the columns for each of the 3 files
+candy_data_2015_reorder <- select(candy_data_raw_2015_long_columns,
+                                  year,
+                                  age,
+                                  gender,
+                                  going_out,
+                                  country,
+                                  candy,
+                                  response)
+candy_data_2016_reorder <- select(candy_data_raw_2016_long_columns,
+                                  year,
+                                  age,
+                                  gender,
+                                  going_out,
+                                  country,
+                                  candy,
+                                  response)
+candy_data_2017_reorder <- select(candy_data_raw_2017_long_columns,
+                                  year,
+                                  age,
+                                  gender,
+                                  going_out,
+                                  country,
+                                  candy,
+                                  response)
+```
+
+names(candy_data_2015_reorder)<br>
+names(candy_data_2016_reorder)<br>
+names(candy_data_2017_reorder)
+```{r}
+names(candy_data_2015_reorder)
+names(candy_data_2016_reorder)
+names(candy_data_2017_reorder)
+```
+## bind into  one file
+```{r}
+# bind the 3 long tibbles  and set country al to lowercase.
+
+candy_data_all_rows <-
+   bind_rows(list(candy_data_2015_reorder, candy_data_2016_reorder, candy_data_2017_reorder))
+candy_data_all_rows <- candy_data_all_rows %>%
+    mutate(score = case_when(response == 'DESPAIR' ~ -1,
+                             response == 'JOY' ~ +1,
+                             response == 'MEH' ~ 0,
+                             TRUE ~  NA_real_))
+dim(candy_data_all_rows)
+names(candy_data_all_rows)
+```
+## make country lowercase
+```{r}
+candy_data_all_rows <- candy_data_all_rows %>%
+  mutate(country = str_to_lower(country))
+```
+## tidy country (code courtesy of Bogdan)
+```{r}
+candy_data_all_rows_country_tidy <- candy_data_all_rows %>%
+  mutate(country = recode(country, 
+                                 "fear and loathing"= "us", 
+                                   "usa usa usa!!!!"  = "us", 
+                                   "united ststes"    = "us", 
+                                   "united statea"    = "us", 
+                                   "u s a"            = "us", 
+                                   "united states"    = "us", 
+                                   "alaska"           = "us", 
+                                   "usaa"             = "us", 
+                                   "murrika"          = "us", 
+                                   "united statss"    = "us", 
+                                   "united ststes"    = "us", 
+                                   "new jersey"       = "us", 
+                                   "ud"               = "us", 
+                                   "ahem....amerca"   = "us", 
+                                   "united stated"    = "us", 
+                                   "i pretend to be from canada, but i am really from the united states."                                       = "us", 
+                                   "usa"              = "us", 
+                                   "california"       = "us", 
+                                   "new york"         = "us", 
+                                   "usas"             = "us", 
+                                   "'merica"          = "us", 
+                                   "usa? hard to tell anymore.." = "us", 
+                                   "unite states"     = "us", 
+                                   "the united states of america" = "us", 
+                                   "u s"              = "us", 
+                                   "unied states"     = "us", 
+                                   "north carolina"   = "us", 
+                                   "the united states"= "us", 
+                                   "us of a"          = "us", 
+                                   "unhinged states"  = "us", 
+                                   "usausausa"        = "us", 
+                                   "u.s.a."           = "us", 
+                                   "united staes"     = "us", 
+                                   "united state"     = "us", 
+                                   "usa"              = "us", 
+                                   "usa"              = "us", 
+                                   "united states of america" = "us", 
+                                   "usa"              = "us", 
+                                   "united states"    = "us", 
+                                   "united states"    = "us", 
+                                   "us"               = "us", 
+                                   "ussa"             = "us", 
+                                   "u.s.a."           = "us", 
+                                   "murica"           = "us", 
+                                   "usa!"             = "us", 
+                                   "usa (i think but it's an election year so who can really tell)"                                                = "us", 
+                                   "usa"              = "us", 
+                                   "u.s."             = "us", 
+                                   "us"               = "us", 
+                                   "america"          = "us", 
+                                   "units states"     = "us", 
+                                   "united states"    = "us", 
+                                   "usa usa usa"      = "us", 
+                                   "usa! usa! usa!"   = "us", 
+                                   "u.s."             = "us", 
+                                   "the yoo ess of aaayyyyyy" = "us", 
+                                   "usa!!!!!!"        = "us", 
+                                   "united sates"     = "us", 
+                                   "merica"           = "us", 
+                                   "united states"    = "us", 
+                                   "the best one - usa" = "us", 
+                                   "usa! usa!"        = "us", 
+                                   "america"          = "us", 
+                                   "usa usa usa usa"  = "us", 
+                                   "unites states"    = "us", 
+                                   "united states of america" = "us", 
+                                   "sub-canadian north america... 'merica" = "us", 
+                                   "u.s."             = "us", 
+                                   "united stetes"    = "us", 
+                                   "united  states of america" = "us", 
+                                   "united kindom"    = "uk", 
+                                   "u.k."             = "uk", 
+                                   "scotland"         = "uk", 
+                                   "united kingdom"   = "uk", 
+                                   "uk"               = "uk", 
+                                   "united kingdom"   = "uk", 
+                                   "uk"               = "uk", 
+                                   "canada"           = "canada", 
+                                   "canada`"          = "canada", 
+                                   "can"              = "canada", 
+                                   "canada"           = "canada",
+                                   "canae"            = "canada",
+                                   "australia"        = "australia", 
+                                   "germany"          = "germany", 
+                                   "france"           = "france", 
+                                   "belgium"          = "belgium", 
+                                   "england"          = "uk", 
+                                   "endland"          = "uk", 
+                                   "hungary"          = "hungary", 
+                                   "sweden"           = "sweden", 
+                                   "finland"          = "finland", 
+                                   "kenya"            = "kenya", 
+                                   "españa"           = "spain", 
+                                   "croatia"          = "croatia", 
+                                   "brasil"           = "brazil", 
+                                   "hong kong"        = "hong kong", 
+                                   "spain"            = "spain", 
+                                   "netherlands"      = "netherlands", 
+                                   "the netherlands"  = "netherlands"))
+```
+
+```{r}
+candy_data_all_rows_country_tidy <- candy_data_all_rows_country_tidy %>%
+  mutate(country = replace(country, country == "na", NA)) %>%
+  mutate(country = replace(country, country == "A tropical island south of the equator", NA)) %>%
+  mutate(country = replace(country, country == "neverland", NA)) %>%
+  mutate(country = replace(country, country == "this one", NA)) %>%
+  mutate(country = replace(country, country == "54.0", NA)) %>%
+  mutate(country = replace(country, country == "cascadia", NA)) %>%
+  mutate(country = replace(country, country == "46", NA)) %>%
+  mutate(country = replace(country, country == "god's country", NA)) %>% 
+  mutate(country = replace(country, country == "45.0", NA)) %>%
+  mutate(country = replace(country, country == "eua", NA)) %>%
+  mutate(country = replace(country, country == "not the usa or canada", NA)) %>%
+  mutate(country = replace(country, country == "denial", NA)) %>%
+  mutate(country = replace(country, country == "35", NA)) %>%
+  mutate(country = replace(country, country == "cascadia", NA)) %>%
+  mutate(country = replace(country, country == "45", NA)) %>%
+  mutate(country = replace(country, country == "atlantis", NA)) %>% 
+  mutate(country = replace(country, country == "n. america", NA)) %>%
+  mutate(country = replace(country, country == "1", NA)) %>%
+  mutate(country = replace(country, country == "i don't know anymore", NA)) %>%
+  mutate(country = replace(country, country == "subscribe to dm4uz3 on youtube", NA)) %>%
+  mutate(country = replace(country, country == "narnia", NA)) %>% 
+  mutate(country = replace(country, country == "soviet canuckistan", NA)) %>%
+  mutate(country = replace(country, country == "there isn't one for old men", NA)) %>%
+  mutate(country = replace(country, country == "one of the best ones", NA)) %>%
+  mutate(country = replace(country, country == "somewhere", NA)) %>%
+  mutate(country = replace(country, country == "trumpistan", NA)) %>%
+  mutate(country = replace(country, country == "30.0", NA)) %>% 
+  mutate(country = replace(country, country == "see above", NA)) %>%
+  mutate(country = replace(country, country == "the republic of cascadia", NA)) %>%
+  mutate(country = replace(country, country == "earth", NA)) %>%
+  mutate(country = replace(country, country == "pittsburgh", NA)) %>% 
+  mutate(country = replace(country, country == "insanity lately", NA)) %>%
+  mutate(country = replace(country, country == "51.0", NA)) %>%
+  mutate(country = replace(country, country == "47.0", NA)) %>% 
+  mutate(country = replace(country, country == "44.0", NA)) %>%
+  mutate(country = replace(country, country == "32", NA)) %>%
+  mutate(country = replace(country, country == "a", NA)) %>%
+  mutate(country = replace(country, country == "korea", NA)) %>%
+  mutate(country = replace(country, country == "europe", NA))
+```
+##  Finally - tidy candy data column values.
+```{r}
+# remember from above, candy was enclosed in "[]" for 2015/16 files, and prefixed "Q6 |" in 2017 file.
+# lets remove these strings.
+candy_data_all_rows_country_tidy <- candy_data_all_rows_country_tidy %>%
+  mutate(candy =   str_replace(candy, "\\|+", "")) %>%
+  mutate(candy =   str_replace(candy, "\\[+", "")) %>%
+  mutate(candy =   str_replace(candy, "\\]", "")) %>%
+  mutate(candy =   str_replace(candy, "Q6", ""))
+  candy_data_all_rows_country_tidy$candy <- trimws(candy_data_all_rows_country_tidy$candy, which = c("left"))
+  head(candy_data_all_rows_country_tidy)
+  dim(candy_data_all_rows_country_tidy)
+```
+
+## What is not tidy
+
+age - could not find/remove outliers. Errors when creating is.outlier dataframe, where values in is.outlier sert to NA (not TRUE, FALSE)<br>
+candy names - probably could be cleaned more.  But difficult to see how I could do this.
+
+## Analysis
+```{r}
+# 1. What is the total number of candy ratings given across the three years. (number of candy ratings, not number of raters. Don’t count missing values)
+
+candy_data_all_rows_country_tidy %>%
+     filter(!is.na(response))  %>%
+     count(response)
+
+candy_data_all_rows_country_tidy %>%
+     filter(!is.na(response))  %>%
+     count(response) %>%
+     summarise(total = sum(n))
+```
+
